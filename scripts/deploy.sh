@@ -8,12 +8,21 @@ if ! docker info > /dev/null 2>&1; then
     exit 1
 fi
 
+# Check SSH key permissions
+if [ ! -f ~/.ssh/id_ed25519 ]; then
+    echo "Error: SSH key not found at ~/.ssh/id_ed25519"
+    exit 1
+fi
+
+# Ensure correct permissions on SSH key
+chmod 600 ~/.ssh/id_ed25519
+
 # Pull latest changes from deployment repo
 git pull origin main
 
-# Pull and recreate containers
-docker-compose pull
-docker-compose up -d --build
+# Build and start containers with SSH agent forwarding
+DOCKER_BUILDKIT=1 docker-compose build --ssh default
+docker-compose up -d
 
 # Clean up unused images
 docker image prune -f

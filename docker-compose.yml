@@ -3,8 +3,10 @@ version: "3.8"
 services:
   backend:
     build:
-      context: git@bitbucket.org:catchshyam/rada-backend.git#main
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend.Dockerfile
+      ssh:
+        - default=/home/ec2-user/.ssh/id_ed25519
     ports:
       - "3000:3000"
     environment:
@@ -13,8 +15,10 @@ services:
 
   frontend:
     build:
-      context: git@bitbucket.org:catchshyam/rada-frontend-ts.git#main
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend.Dockerfile
+      ssh:
+        - default=/home/ec2-user/.ssh/id_ed25519
     ports:
       - "80:80"
     depends_on:
