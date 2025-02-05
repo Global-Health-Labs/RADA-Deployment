@@ -22,6 +22,9 @@ RUN --mount=type=ssh,id=default git clone --branch main git@bitbucket.org:catchs
 # Create .env file with build arguments
 RUN echo "VITE_API_URL=$VITE_API_URL" > .env
 
+# Copy .env file if it exists (will override the previous one if present)
+COPY frontend/.env .env || true
+
 # Install dependencies and build
 RUN pnpm install --no-frozen-lockfile
 RUN pnpm build
