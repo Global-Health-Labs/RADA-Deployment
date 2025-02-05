@@ -28,8 +28,6 @@ services:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
     ports:
       - "80:80"
-    env_file:
-      - ./frontend/.env
     depends_on:
       - backend
     restart: unless-stopped
