@@ -14,13 +14,14 @@ if [ ! -f ~/.ssh/id_ed25519 ]; then
     exit 1
 fi
 
+# Kill any existing SSH agents
+pkill ssh-agent || true
+
 # Ensure correct permissions on SSH key
 chmod 600 ~/.ssh/id_ed25519
 
-# Start SSH agent if not running
+# Start SSH agent and add key
 eval $(ssh-agent -s)
-
-# Add SSH key to agent
 ssh-add ~/.ssh/id_ed25519
 
 # Pull latest changes from deployment repo
@@ -34,7 +35,7 @@ export CACHE_DATE=$(date +%s)
 
 # Build and start containers with SSH agent forwarding and no cache
 export DOCKER_BUILDKIT=1
-docker-compose build --no-cache --ssh default="$SSH_AUTH_SOCK"
+docker-compose build --no-cache
 
 # Start the containers in detached mode
 docker-compose up -d
@@ -44,4 +45,4 @@ docker image prune -f
 docker builder prune -f
 
 # Clean up SSH agent
-ssh-agent -k
+eval $(ssh-agent -k)

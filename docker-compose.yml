@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: backend.Dockerfile
       ssh:
-        - default
+        - source=default
       args:
         CACHE_DATE: ${CACHE_DATE:-}
     ports:
@@ -22,7 +22,7 @@ services:
       context: .
       dockerfile: frontend.Dockerfile
       ssh:
-        - default
+        - source=default
       args:
         CACHE_DATE: ${CACHE_DATE:-}
         VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
