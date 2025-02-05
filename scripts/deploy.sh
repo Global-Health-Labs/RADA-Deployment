@@ -17,6 +17,12 @@ fi
 # Ensure correct permissions on SSH key
 chmod 600 ~/.ssh/id_ed25519
 
+# Start SSH agent if not running
+eval $(ssh-agent -s)
+
+# Add SSH key to agent
+ssh-add ~/.ssh/id_ed25519
+
 # Pull latest changes from deployment repo
 git pull origin main
 
@@ -27,7 +33,8 @@ docker-compose down
 export CACHE_DATE=$(date +%s)
 
 # Build and start containers with SSH agent forwarding and no cache
-DOCKER_BUILDKIT=1 docker-compose build --no-cache --ssh default
+export DOCKER_BUILDKIT=1
+docker-compose build --no-cache --ssh default="$SSH_AUTH_SOCK"
 
 # Start the containers in detached mode
 docker-compose up -d
@@ -35,3 +42,6 @@ docker-compose up -d
 # Clean up unused images and build cache
 docker image prune -f
 docker builder prune -f
+
+# Clean up SSH agent
+ssh-agent -k
