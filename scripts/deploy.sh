@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e  # Exit on error
+
 # Check if Docker daemon is accessible
 if ! docker info > /dev/null 2>&1; then
     echo "Error: Cannot connect to Docker daemon. Please run:"
@@ -24,23 +26,25 @@ chmod 600 ~/.ssh/id_ed25519
 eval $(ssh-agent -s)
 ssh-add ~/.ssh/id_ed25519
 
-# Pull latest changes from deployment repo
+echo "Pulling latest changes..."
 git pull origin main
 
-# Stop existing containers
+echo "Stopping existing containers..."
 docker-compose down
 
 # Generate cache buster
 export CACHE_DATE=$(date +%s)
+echo "Using cache buster: $CACHE_DATE"
 
-# Build and start containers with SSH agent forwarding and no cache
+echo "Building containers..."
 export DOCKER_BUILDKIT=1
-docker-compose build --no-cache
+docker-compose build --no-cache backend
+docker-compose build --no-cache frontend
 
-# Start the containers in detached mode
+echo "Starting containers..."
 docker-compose up -d
 
-# Clean up unused images and build cache
+echo "Cleaning up..."
 docker image prune -f
 docker builder prune -f
 

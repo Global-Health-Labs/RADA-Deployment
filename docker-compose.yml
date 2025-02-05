@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: backend.Dockerfile
       ssh:
-        - source=default
+        - default=/home/ec2-user/.ssh/id_ed25519
       args:
         CACHE_DATE: ${CACHE_DATE:-}
     ports:
@@ -22,7 +22,7 @@ services:
       context: .
       dockerfile: frontend.Dockerfile
       ssh:
-        - source=default
+        - default=/home/ec2-user/.ssh/id_ed25519
       args:
         CACHE_DATE: ${CACHE_DATE:-}
         VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
