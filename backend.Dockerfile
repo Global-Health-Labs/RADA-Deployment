@@ -18,6 +18,9 @@ ARG CACHE_DATE
 # Clone repository using SSH
 RUN --mount=type=ssh,id=default git clone --branch main git@bitbucket.org:catchshyam/rada-backend.git . && git pull origin main
 
+# Copy .env file from host if it exists, otherwise create default
+COPY ./backend/.env* ./.env* 2>/dev/null || :
+
 # Install dependencies and build
 RUN pnpm install --no-frozen-lockfile
 RUN pnpm build

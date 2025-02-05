@@ -13,6 +13,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+    env_file:
+      - ./backend/.env
     restart: unless-stopped
 
   frontend:
@@ -23,8 +25,11 @@ services:
         - default=/home/ec2-user/.ssh/id_ed25519
       args:
         CACHE_DATE: ${CACHE_DATE:-}
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
     ports:
       - "80:80"
+    env_file:
+      - ./frontend/.env
     depends_on:
       - backend
     restart: unless-stopped
