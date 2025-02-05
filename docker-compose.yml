@@ -7,6 +7,8 @@ services:
       dockerfile: backend.Dockerfile
       ssh:
         - default=/home/ec2-user/.ssh/id_ed25519
+      args:
+        CACHE_DATE: ${CACHE_DATE:-}
     ports:
       - "3000:3000"
     environment:
@@ -19,6 +21,8 @@ services:
       dockerfile: frontend.Dockerfile
       ssh:
         - default=/home/ec2-user/.ssh/id_ed25519
+      args:
+        CACHE_DATE: ${CACHE_DATE:-}
     ports:
       - "80:80"
     depends_on:
