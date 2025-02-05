@@ -20,9 +20,18 @@ chmod 600 ~/.ssh/id_ed25519
 # Pull latest changes from deployment repo
 git pull origin main
 
-# Build and start containers with SSH agent forwarding
-DOCKER_BUILDKIT=1 docker-compose build --ssh default
+# Stop existing containers
+docker-compose down
+
+# Generate cache buster
+export CACHE_DATE=$(date +%s)
+
+# Build and start containers with SSH agent forwarding and no cache
+DOCKER_BUILDKIT=1 docker-compose build --no-cache --ssh default
+
+# Start the containers in detached mode
 docker-compose up -d
 
-# Clean up unused images
+# Clean up unused images and build cache
 docker image prune -f
+docker builder prune -f
