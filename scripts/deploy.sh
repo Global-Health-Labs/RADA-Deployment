@@ -16,6 +16,22 @@ if [ ! -f ~/.ssh/id_ed25519 ]; then
     exit 1
 fi
 
+# Create necessary directories
+mkdir -p backend frontend
+
+# Check for .env files
+if [ ! -f backend/.env ]; then
+    echo "Error: backend/.env file not found"
+    echo "Please create backend/.env with your environment variables"
+    exit 1
+fi
+
+if [ ! -f frontend/.env ]; then
+    echo "Warning: frontend/.env file not found"
+    echo "Creating empty frontend/.env"
+    touch frontend/.env
+fi
+
 # Kill any existing SSH agents
 pkill ssh-agent || true
 

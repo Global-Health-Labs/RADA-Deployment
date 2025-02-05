@@ -19,11 +19,10 @@ ARG VITE_API_URL
 # Clone repository using SSH
 RUN --mount=type=ssh,id=default git clone --branch main git@bitbucket.org:catchshyam/rada-frontend-ts.git . && git pull origin main
 
-# Create .env file with build arguments
-RUN echo "VITE_API_URL=$VITE_API_URL" > .env
-
-# Copy .env file if it exists (will override the previous one if present)
-COPY frontend/.env .env || true
+# Create empty .env if not copied
+RUN touch .env
+# Copy .env file (will override empty one if exists)
+COPY frontend/.env .env
 
 # Install dependencies and build
 RUN pnpm install --no-frozen-lockfile
