@@ -48,10 +48,6 @@ git pull origin main
 echo "Stopping existing containers..."
 docker-compose down
 
-# Generate cache buster
-export CACHE_DATE=$(date +%s)
-echo "Using cache buster: $CACHE_DATE"
-
 echo "Building containers..."
 export DOCKER_BUILDKIT=1
 docker-compose build --no-cache backend
