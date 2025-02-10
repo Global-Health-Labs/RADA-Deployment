@@ -14,14 +14,11 @@ RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
 
 # Add cache buster
 ARG CACHE_DATE
-ARG VITE_API_URL
 
 # Clone repository using SSH
 RUN --mount=type=ssh,id=default git clone --branch main git@bitbucket.org:catchshyam/rada-frontend-ts.git . && git pull origin main
 
-# Create empty .env if not copied
-RUN touch .env
-# Copy .env file (will override empty one if exists)
+# Copy .env file
 COPY frontend/.env .env
 
 # Install dependencies and build

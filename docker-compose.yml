@@ -25,7 +25,6 @@ services:
         - default=/home/ec2-user/.ssh/id_ed25519
       args:
         CACHE_DATE: ${CACHE_DATE:-}
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
     ports:
       - "80:80"
     depends_on:
