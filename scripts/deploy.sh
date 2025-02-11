@@ -19,6 +19,23 @@ fi
 # Create necessary directories
 mkdir -p backend frontend
 
+# Create env.sh script for frontend
+cat > frontend/env.sh << 'EOL'
+#!/bin/sh
+
+# Recreate config file
+NGINX_ROOT=/usr/share/nginx/html
+ENV_FILE="${NGINX_ROOT}/env-config.js"
+
+# Add runtime environment variables
+echo "window._env_ = {" > $ENV_FILE
+echo "  VITE_BACKEND_URL: \"$VITE_BACKEND_URL\"," >> $ENV_FILE
+echo "}" >> $ENV_FILE
+EOL
+
+# Make env.sh executable
+chmod +x frontend/env.sh
+
 # Check for backend .env file
 if [ ! -f backend/.env ]; then
     echo "Error: backend/.env file not found"
