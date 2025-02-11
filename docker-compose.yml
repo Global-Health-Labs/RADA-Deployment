@@ -9,10 +9,13 @@ services:
         - default=/home/ec2-user/.ssh/id_ed25519
     ports:
       - "3000:8080"
+      - "443:8443"  # HTTPS port
     environment:
       - NODE_ENV=production
     env_file:
       - ./backend/.env
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: unless-stopped
 
   frontend:
@@ -23,8 +26,11 @@ services:
         - default=/home/ec2-user/.ssh/id_ed25519
     ports:
       - "80:80"
+      - "443:443"  # HTTPS port
     env_file:
       - ./frontend/.env
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - backend
     restart: unless-stopped
