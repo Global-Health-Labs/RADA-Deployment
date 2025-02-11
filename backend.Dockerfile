@@ -4,7 +4,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Install system dependencies
-RUN apk add --no-cache git openssh wget
+RUN apk add --no-cache git openssh wget python3 py3-pip
 
 # Install pnpm
 RUN npm install -g pnpm@10.0.0
@@ -28,6 +28,10 @@ RUN chmod 600 db-ssl-certificate.pem
 # Install dependencies and build
 RUN pnpm install --no-frozen-lockfile
 RUN pnpm build
+
+# Install Python dependencies
+COPY resources/lfa-py/requirements.txt ./requirements.txt
+RUN pip install -r requirements.txt
 
 EXPOSE 8080 8443
 CMD ["pnpm", "start"]
