@@ -2,6 +2,10 @@
 
 set -e  # Exit on error
 
+# Get the absolute path of the deployment directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+DEPLOY_DIR="$(dirname "$SCRIPT_DIR")"
+
 # Check if Docker daemon is accessible
 if ! docker info > /dev/null 2>&1; then
     echo "Error: Cannot connect to Docker daemon. Please run:"
@@ -13,6 +17,22 @@ fi
 # Check SSH key permissions
 if [ ! -f ~/.ssh/id_ed25519 ]; then
     echo "Error: SSH key not found at ~/.ssh/id_ed25519"
+    exit 1
+fi
+
+# Check for deployment .env file
+if [ ! -f "${DEPLOY_DIR}/.env" ]; then
+    echo "Error: .env file not found in deployment directory"
+    echo "Please copy .env.template to .env and set your environment variables"
+    exit 1
+fi
+
+# Load deployment environment variables
+echo "Loading deployment environment variables..."
+export $(cat "${DEPLOY_DIR}/.env" | grep -v '^#' | xargs)
+
+if [ -z "$DOMAIN_NAME" ]; then
+    echo "Error: DOMAIN_NAME must be set in .env"
     exit 1
 fi
 
@@ -74,15 +94,15 @@ echo "Pulling latest changes..."
 git pull origin main
 
 echo "Stopping existing containers..."
-docker-compose down
+docker-compose --env-file "${DEPLOY_DIR}/.env" down
 
 echo "Building containers..."
 export DOCKER_BUILDKIT=1
-docker-compose build --no-cache backend
-docker-compose build --no-cache frontend
+docker-compose --env-file "${DEPLOY_DIR}/.env" build --no-cache backend
+docker-compose --env-file "${DEPLOY_DIR}/.env" build --no-cache frontend
 
 echo "Starting containers..."
-docker-compose up -d
+docker-compose --env-file "${DEPLOY_DIR}/.env" up -d
 
 echo "Cleaning up..."
 docker image prune -f
@@ -90,3 +110,5 @@ docker builder prune -f
 
 # Clean up SSH agent
 eval $(ssh-agent -k)
+
+echo "Deployment complete!"
