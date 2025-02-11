@@ -12,6 +12,7 @@ services:
       - "8443:8443"  # HTTPS port
     environment:
       - NODE_ENV=production
+      - DOMAIN_NAME=${DOMAIN_NAME}
     env_file:
       - ./backend/.env
     volumes:
