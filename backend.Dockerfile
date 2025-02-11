@@ -30,7 +30,7 @@ RUN pnpm install --no-frozen-lockfile
 RUN pnpm build
 
 # Install Python dependencies
-COPY resources/lfa-py/requirements.txt ./requirements.txt
+COPY ../rada-backend/resources/lfa-py/requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
 
 EXPOSE 8080 8443
