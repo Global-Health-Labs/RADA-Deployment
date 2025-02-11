@@ -16,7 +16,7 @@ RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
 RUN --mount=type=ssh,id=default git clone --branch main git@bitbucket.org:catchshyam/rada-backend.git . && git pull origin main
 
 # Create empty .env and SSL cert file if not copied
-RUN touch .env && touch us-east-2-bundle.pem
+RUN touch .env && touch db-ssl-certificate.pem
 
 # Copy .env file and SSL certificate (will override empty ones if they exist)
 COPY backend/.env .env
