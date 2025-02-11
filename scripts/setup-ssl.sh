@@ -19,8 +19,8 @@ if [ -f "../backend/.env" ]; then
         
         # Only process DOMAIN and USE_HTTPS variables
         if [[ $key == DOMAIN_NAME ]] || [[ $key == API_DOMAIN ]] || [[ $key == USE_HTTPS ]]; then
-            # Remove any surrounding quotes from the value
-            value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")
+            # Remove any surrounding quotes and port numbers from the value
+            value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//" -e 's/:[0-9]*$//')
             export "$key=$value"
         fi
     done < "../backend/.env"
@@ -38,9 +38,12 @@ echo "Using domains:"
 echo "Frontend: $DOMAIN_NAME"
 echo "Backend: $API_DOMAIN"
 
+# Update package list and install EPEL
+dnf update -y
+dnf install -y epel-release
+
 # Install certbot and nginx plugin
-amazon-linux-extras install epel -y
-yum install certbot python3-certbot-nginx -y
+dnf install -y certbot python3-certbot-nginx
 
 # Stop nginx temporarily
 systemctl stop nginx || true
