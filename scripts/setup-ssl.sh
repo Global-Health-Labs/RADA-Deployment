@@ -9,9 +9,21 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Load environment variables
+# Load environment variables safely
 if [ -f "../backend/.env" ]; then
-    source ../backend/.env
+    # Read each line and export variables that start with DOMAIN or USE_HTTPS
+    while IFS='=' read -r key value; do
+        # Skip comments and empty lines
+        [[ $key =~ ^#.*$ ]] && continue
+        [[ -z $key ]] && continue
+        
+        # Only process DOMAIN and USE_HTTPS variables
+        if [[ $key == DOMAIN_NAME ]] || [[ $key == API_DOMAIN ]] || [[ $key == USE_HTTPS ]]; then
+            # Remove any surrounding quotes from the value
+            value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")
+            export "$key=$value"
+        fi
+    done < "../backend/.env"
 else
     echo "Error: backend/.env file not found"
     exit 1
@@ -22,29 +34,33 @@ if [ -z "$DOMAIN_NAME" ] || [ -z "$API_DOMAIN" ]; then
     exit 1
 fi
 
+echo "Using domains:"
+echo "Frontend: $DOMAIN_NAME"
+echo "Backend: $API_DOMAIN"
+
 # Install certbot and nginx plugin
 amazon-linux-extras install epel -y
 yum install certbot python3-certbot-nginx -y
 
 # Stop nginx temporarily
-systemctl stop nginx
+systemctl stop nginx || true
 
 # Get certificates for frontend
 certbot certonly --standalone \
     --non-interactive \
     --agree-tos \
-    --email your-email@example.com \
+    --email shyam.p@appzoy.com \
     -d ${DOMAIN_NAME}
 
 # Get certificates for backend
 certbot certonly --standalone \
     --non-interactive \
     --agree-tos \
-    --email your-email@example.com \
+    --email shyam.p@appzoy.com \
     -d ${API_DOMAIN}
 
 # Start nginx
-systemctl start nginx
+systemctl start nginx || true
 
 # Set up automatic renewal
 echo "0 0,12 * * * root python3 -c 'import random; import time; time.sleep(random.random() * 3600)' && certbot renew -q" | sudo tee -a /etc/crontab > /dev/null
