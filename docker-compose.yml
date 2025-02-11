@@ -30,8 +30,6 @@ services:
       - "443:443"  # HTTPS port
     environment:
       - NGINX_DOMAIN=${DOMAIN_NAME}
-    env_file:
-      - ./frontend/.env
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
