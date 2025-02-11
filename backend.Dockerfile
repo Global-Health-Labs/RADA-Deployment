@@ -3,8 +3,8 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Add git and openssh
-RUN apk add --no-cache git openssh
+# Install system dependencies
+RUN apk add --no-cache git openssh wget
 
 # Install pnpm
 RUN npm install -g pnpm@10.0.0
@@ -29,5 +29,5 @@ RUN chmod 600 db-ssl-certificate.pem
 RUN pnpm install --no-frozen-lockfile
 RUN pnpm build
 
-# Start the application
+EXPOSE 8080 8443
 CMD ["pnpm", "start"]

@@ -20,10 +20,11 @@ services:
     networks:
       - rada-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "https://localhost:8443/health"]
+      test: ["CMD-SHELL", "wget --no-check-certificate -q --spider https://localhost:8443/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 30s
 
   frontend:
     build:
@@ -46,10 +47,11 @@ services:
     networks:
       - rada-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:80/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 30s
 
 networks:
   rada-network:
