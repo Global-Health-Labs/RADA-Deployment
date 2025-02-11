@@ -9,11 +9,15 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Get the absolute path of the deployment directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+DEPLOY_DIR="$(dirname "$SCRIPT_DIR")"
+
 # Function to clean up Docker
 cleanup_docker() {
     echo "Cleaning up Docker..."
     # Stop all containers
-    docker-compose --env-file ../.env down || true
+    docker-compose --env-file "${DEPLOY_DIR}/.env" --file "${DEPLOY_DIR}/docker-compose.yml" down || true
     
     # Remove all containers
     docker rm -f $(docker ps -aq) 2>/dev/null || true
@@ -30,16 +34,16 @@ cleanup_docker() {
 }
 
 # Load deployment environment variables
-if [ -f "../.env" ]; then
-    echo "Loading deployment environment variables..."
-    export $(cat ../.env | grep -v '^#' | xargs)
+if [ -f "${DEPLOY_DIR}/.env" ]; then
+    echo "Loading deployment environment variables from ${DEPLOY_DIR}/.env"
+    export $(cat "${DEPLOY_DIR}/.env" | grep -v '^#' | xargs)
 else
-    echo "Error: .env file not found in deployment directory"
+    echo "Error: .env file not found in deployment directory (${DEPLOY_DIR}/.env)"
     exit 1
 fi
 
 # Load backend environment variables
-if [ -f "../backend/.env" ]; then
+if [ -f "${DEPLOY_DIR}/backend/.env" ]; then
     echo "Loading backend environment variables..."
     while IFS='=' read -r key value; do
         # Skip comments and empty lines
@@ -52,7 +56,7 @@ if [ -f "../backend/.env" ]; then
             value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")
             export "$key=$value"
         fi
-    done < "../backend/.env"
+    done < "${DEPLOY_DIR}/backend/.env"
 else
     echo "Error: backend/.env file not found"
     exit 1
@@ -70,7 +74,7 @@ dnf update -y
 dnf install -y certbot python3-certbot-nginx
 
 # Clean up Docker and ensure ports are free
-cd ..
+cd "${DEPLOY_DIR}"
 cleanup_docker
 
 # Get certificate for the domain
@@ -85,7 +89,7 @@ cleanup_docker
 
 # Start Docker containers with explicit env file
 echo "Starting Docker containers..."
-docker-compose --env-file .env up -d
+docker-compose --env-file .env --file docker-compose.yml up -d
 
 echo "SSL certificate has been installed and configured for auto-renewal"
 echo "Certificate installed for: ${DOMAIN_NAME}"
