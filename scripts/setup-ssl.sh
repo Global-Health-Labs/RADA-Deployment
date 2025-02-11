@@ -42,6 +42,11 @@ echo "Backend: $API_DOMAIN"
 dnf update -y
 dnf install -y certbot python3-certbot-nginx
 
+# Stop Docker containers that might be using port 80/443
+echo "Stopping Docker containers..."
+cd ..
+docker-compose down || true
+
 # Stop nginx temporarily
 systemctl stop nginx || true
 
@@ -62,6 +67,10 @@ certbot certonly --standalone \
 # Start nginx
 systemctl start nginx || true
 
+# Restart Docker containers
+echo "Restarting Docker containers..."
+docker-compose up -d
+
 # Set up automatic renewal
 echo "0 0,12 * * * root python3 -c 'import random; import time; time.sleep(random.random() * 3600)' && certbot renew -q" | sudo tee -a /etc/crontab > /dev/null
 
@@ -69,3 +78,5 @@ echo "SSL certificates have been installed and configured for auto-renewal"
 echo "Certificates installed for:"
 echo "Frontend: ${DOMAIN_NAME}"
 echo "Backend: ${API_DOMAIN}"
+
+echo "Setup complete! Your certificates are installed and will auto-renew."
