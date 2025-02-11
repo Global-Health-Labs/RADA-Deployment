@@ -7,7 +7,7 @@ WORKDIR /app
 RUN apk add --no-cache git openssh
 
 # Install pnpm
-RUN npm install -g pnpm@10.0.0
+RUN npm install -g pnpm
 
 # Download public key for bitbucket.org
 RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
@@ -18,14 +18,9 @@ RUN --mount=type=ssh,id=default git clone --branch main git@bitbucket.org:catchs
 # Copy package files
 COPY frontend/package*.json ./
 
-# Install dependencies
-RUN npm ci
-
-# Copy source code
-COPY frontend/ .
-
-# Build the application
-RUN npm run build
+# Install dependencies and build
+RUN pnpm install --no-frozen-lockfile
+RUN pnpm run build
 
 # Production stage
 FROM nginx:alpine
