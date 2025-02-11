@@ -38,13 +38,8 @@ echo "Using domains:"
 echo "Frontend: $DOMAIN_NAME"
 echo "Backend: $API_DOMAIN"
 
-# Update package list and enable EPEL
+# Update package list and install certbot
 dnf update -y
-dnf install -y 'dnf-command(copr)'
-dnf copr enable -y copart/certbot
-dnf makecache
-
-# Install certbot and nginx plugin
 dnf install -y certbot python3-certbot-nginx
 
 # Stop nginx temporarily
