@@ -24,9 +24,9 @@ RUN . /app/venv/bin/activate && \
 # Create empty .env and SSL cert file if not copied
 RUN touch .env && touch db-ssl-certificate.pem
 
-# Copy environment variables and SSL certificate if they exist
-COPY --chmod=600 .env* .env || true
-COPY --chmod=600 db-ssl-certificate.pem db-ssl-certificate.pem || true
+# Copy .env file and SSL certificate (will override empty ones if they exist)
+COPY backend/.env .env
+COPY backend/db-ssl-certificate.pem db-ssl-certificate.pem
 
 # Set proper permissions for SSL certificate
 RUN chmod 600 db-ssl-certificate.pem
