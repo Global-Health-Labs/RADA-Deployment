@@ -9,25 +9,6 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Function to check and free ports
-free_ports() {
-    local ports=("80" "443" "3000" "8443")
-    for port in "${ports[@]}"; do
-        # Check if port is in use
-        if netstat -tuln | grep ":$port " > /dev/null; then
-            echo "Port $port is in use. Attempting to free it..."
-            # Try to find and stop the process using the port
-            pid=$(lsof -t -i:$port)
-            if [ ! -z "$pid" ]; then
-                echo "Stopping process $pid using port $port"
-                kill -TERM $pid || kill -KILL $pid
-            fi
-        fi
-    done
-    # Wait a moment for ports to be freed
-    sleep 2
-}
-
 # Function to clean up Docker
 cleanup_docker() {
     echo "Cleaning up Docker..."
@@ -57,7 +38,7 @@ if [ -f "../backend/.env" ]; then
         [[ -z $key ]] && continue
         
         # Only process DOMAIN and USE_HTTPS variables
-        if [[ $key == DOMAIN_NAME ]] || [[ $key == API_DOMAIN ]] || [[ $key == USE_HTTPS ]]; then
+        if [[ $key == DOMAIN_NAME ]] || [[ $key == USE_HTTPS ]]; then
             # Remove any surrounding quotes and port numbers from the value
             value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//" -e 's/:[0-9]*$//')
             export "$key=$value"
@@ -68,64 +49,40 @@ else
     exit 1
 fi
 
-if [ -z "$DOMAIN_NAME" ] || [ -z "$API_DOMAIN" ]; then
-    echo "Error: DOMAIN_NAME and API_DOMAIN must be set in backend/.env"
+if [ -z "$DOMAIN_NAME" ]; then
+    echo "Error: DOMAIN_NAME must be set in backend/.env"
     exit 1
 fi
 
-echo "Using domains:"
-echo "Frontend: $DOMAIN_NAME"
-echo "Backend: $API_DOMAIN"
+echo "Using domain: $DOMAIN_NAME"
 
 # Update package list and install certbot
 dnf update -y
 dnf install -y certbot python3-certbot-nginx
 
-# Stop Docker containers and free ports
-echo "Stopping Docker containers..."
+# Clean up Docker and ensure ports are free
 cd ..
-docker-compose down || true
-free_ports
-
-# Clean up Docker
 cleanup_docker
 
-# Stop nginx temporarily
-systemctl stop nginx || true
-
-# Get certificates for frontend
+# Get certificate for the domain
 certbot certonly --standalone \
     --non-interactive \
     --agree-tos \
     --email shyam.p@appzoy.com \
     -d ${DOMAIN_NAME}
 
-# Get certificates for backend
-certbot certonly --standalone \
-    --non-interactive \
-    --agree-tos \
-    --email shyam.p@appzoy.com \
-    -d ${API_DOMAIN}
-
-# Free ports again before starting containers
-free_ports
-
-# Clean up Docker again
+# Clean up again before starting containers
 cleanup_docker
 
-# Start nginx
-systemctl start nginx || true
-
-# Restart Docker containers
-echo "Restarting Docker containers..."
+# Start Docker containers
+echo "Starting Docker containers..."
 docker-compose up -d
 
+echo "SSL certificate has been installed and configured for auto-renewal"
+echo "Certificate installed for: ${DOMAIN_NAME}"
+
 # Set up automatic renewal
+echo "Setting up automatic renewal..."
 echo "0 0,12 * * * root python3 -c 'import random; import time; time.sleep(random.random() * 3600)' && certbot renew -q" | sudo tee -a /etc/crontab > /dev/null
 
-echo "SSL certificates have been installed and configured for auto-renewal"
-echo "Certificates installed for:"
-echo "Frontend: ${DOMAIN_NAME}"
-echo "Backend: ${API_DOMAIN}"
-
-echo "Setup complete! Your certificates are installed and will auto-renew."
+echo "Setup complete! Your certificate is installed and will auto-renew."
