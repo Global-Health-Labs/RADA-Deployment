@@ -15,6 +15,9 @@ RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
 # Clone repository using SSH
 RUN --mount=type=ssh,id=default git clone --branch main git@bitbucket.org:catchshyam/rada-backend.git . && git pull origin main
 
+# Install Python dependencies from the cloned repository
+RUN pip install -r resources/lfa-py/requirements.txt
+
 # Create empty .env and SSL cert file if not copied
 RUN touch .env && touch db-ssl-certificate.pem
 
@@ -25,13 +28,9 @@ COPY backend/db-ssl-certificate.pem db-ssl-certificate.pem
 # Set proper permissions for SSL certificate
 RUN chmod 600 db-ssl-certificate.pem
 
-# Install dependencies and build
+# Install Node.js dependencies and build
 RUN pnpm install --no-frozen-lockfile
 RUN pnpm build
-
-# Install Python dependencies
-COPY ../rada-backend/resources/lfa-py/requirements.txt ./requirements.txt
-RUN pip install -r requirements.txt
 
 EXPOSE 8080 8443
 CMD ["pnpm", "start"]
