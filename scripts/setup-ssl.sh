@@ -9,6 +9,25 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Function to check and free ports
+free_ports() {
+    local ports=("80" "443" "3000" "8443")
+    for port in "${ports[@]}"; do
+        # Check if port is in use
+        if netstat -tuln | grep ":$port " > /dev/null; then
+            echo "Port $port is in use. Attempting to free it..."
+            # Try to find and stop the process using the port
+            pid=$(lsof -t -i:$port)
+            if [ ! -z "$pid" ]; then
+                echo "Stopping process $pid using port $port"
+                kill -TERM $pid || kill -KILL $pid
+            fi
+        fi
+    done
+    # Wait a moment for ports to be freed
+    sleep 2
+}
+
 # Load environment variables safely
 if [ -f "../backend/.env" ]; then
     # Read each line and export variables that start with DOMAIN or USE_HTTPS
@@ -42,10 +61,11 @@ echo "Backend: $API_DOMAIN"
 dnf update -y
 dnf install -y certbot python3-certbot-nginx
 
-# Stop Docker containers that might be using port 80/443
+# Stop Docker containers and free ports
 echo "Stopping Docker containers..."
 cd ..
 docker-compose down || true
+free_ports
 
 # Stop nginx temporarily
 systemctl stop nginx || true
@@ -63,6 +83,9 @@ certbot certonly --standalone \
     --agree-tos \
     --email shyam.p@appzoy.com \
     -d ${API_DOMAIN}
+
+# Free ports again before starting containers
+free_ports
 
 # Start nginx
 systemctl start nginx || true
