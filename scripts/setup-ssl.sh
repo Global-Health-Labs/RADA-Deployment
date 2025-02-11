@@ -28,6 +28,26 @@ free_ports() {
     sleep 2
 }
 
+# Function to clean up Docker
+cleanup_docker() {
+    echo "Cleaning up Docker..."
+    # Stop all containers
+    docker-compose down || true
+    
+    # Remove all containers
+    docker rm -f $(docker ps -aq) 2>/dev/null || true
+    
+    # Remove all networks
+    docker network prune -f || true
+    
+    # Restart Docker daemon
+    systemctl restart docker
+    
+    # Wait for Docker to be ready
+    echo "Waiting for Docker to restart..."
+    sleep 5
+}
+
 # Load environment variables safely
 if [ -f "../backend/.env" ]; then
     # Read each line and export variables that start with DOMAIN or USE_HTTPS
@@ -67,6 +87,9 @@ cd ..
 docker-compose down || true
 free_ports
 
+# Clean up Docker
+cleanup_docker
+
 # Stop nginx temporarily
 systemctl stop nginx || true
 
@@ -86,6 +109,9 @@ certbot certonly --standalone \
 
 # Free ports again before starting containers
 free_ports
+
+# Clean up Docker again
+cleanup_docker
 
 # Start nginx
 systemctl start nginx || true
