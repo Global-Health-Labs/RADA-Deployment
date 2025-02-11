@@ -26,6 +26,15 @@ if [ ! -f backend/.env ]; then
     exit 1
 fi
 
+# Check for SSL certificate if DB_USE_SSL is true
+if grep -q "DB_USE_SSL=true" backend/.env; then
+    if [ ! -f backend/us-east-2-bundle.pem ]; then
+        echo "Error: SSL certificate (backend/us-east-2-bundle.pem) not found"
+        echo "Please add the SSL certificate file as it's required when DB_USE_SSL=true"
+        exit 1
+    fi
+fi
+
 if [ ! -f frontend/.env ]; then
     echo "Warning: frontend/.env file not found"
     echo "Creating empty frontend/.env"
