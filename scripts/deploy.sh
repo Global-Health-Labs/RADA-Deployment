@@ -40,17 +40,21 @@ fi
 mkdir -p backend frontend
 
 # Create env.sh script for frontend
-cat > frontend/env.sh << 'EOL'
+cat > frontend/env.sh << EOL
 #!/bin/sh
 
 # Recreate config file
 NGINX_ROOT=/usr/share/nginx/html
-ENV_FILE="${NGINX_ROOT}/env-config.js"
+ENV_FILE="\${NGINX_ROOT}/env-config.js"
 
-# Add runtime environment variables
-echo "window._env_ = {" > $ENV_FILE
-echo "  VITE_BACKEND_URL: \"$VITE_BACKEND_URL\"," >> $ENV_FILE
-echo "}" >> $ENV_FILE
+# Add runtime environment variables with actual values
+echo "window._env_ = {" > \$ENV_FILE
+echo "  VITE_BACKEND_URL: \"\${VITE_BACKEND_URL}\"," >> \$ENV_FILE
+echo "}" >> \$ENV_FILE
+
+# For debugging
+echo "Generated env-config.js with content:"
+cat \$ENV_FILE
 EOL
 
 # Make env.sh executable
@@ -63,13 +67,10 @@ if [ ! -f backend/.env ]; then
     exit 1
 fi
 
-# Check for frontend .env file
-if [ ! -f frontend/.env ]; then
-    echo "Error: frontend/.env file not found"
-    echo "Please create frontend/.env with your environment variables"
-    echo "Make sure to set VITE_BACKEND_URL for your environment"
-    exit 1
-fi
+# Create frontend .env file with the correct backend URL
+cat > frontend/.env << EOL
+VITE_BACKEND_URL=https://${DOMAIN_NAME}/api
+EOL
 
 # Check for SSL certificate if DB_USE_SSL is true
 if grep -q "DB_USE_SSL=true" backend/.env; then

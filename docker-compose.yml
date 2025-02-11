@@ -30,6 +30,7 @@ services:
       - "443:443"  # HTTPS port
     environment:
       - NGINX_DOMAIN=${DOMAIN_NAME}
+      - VITE_BACKEND_URL=https://${DOMAIN_NAME}/api
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
