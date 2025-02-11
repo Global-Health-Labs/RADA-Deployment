@@ -4,7 +4,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Install system dependencies
-RUN apk add --no-cache git openssh wget python3 py3-pip python3-venv
+RUN apk add --no-cache git openssh wget python3 py3-pip py3-virtualenv
 
 # Install pnpm
 RUN npm install -g pnpm@10.0.0
