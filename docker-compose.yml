@@ -23,6 +23,8 @@ services:
         - default=/home/ec2-user/.ssh/id_ed25519
     ports:
       - "80:80"
+    env_file:
+      - ./frontend/.env
     depends_on:
       - backend
     restart: unless-stopped

@@ -19,10 +19,18 @@ fi
 # Create necessary directories
 mkdir -p backend frontend
 
-# Check for .env files
+# Check for backend .env file
 if [ ! -f backend/.env ]; then
     echo "Error: backend/.env file not found"
     echo "Please create backend/.env with your environment variables"
+    exit 1
+fi
+
+# Check for frontend .env file
+if [ ! -f frontend/.env ]; then
+    echo "Error: frontend/.env file not found"
+    echo "Please create frontend/.env with your environment variables"
+    echo "Make sure to set VITE_BACKEND_URL for your environment"
     exit 1
 fi
 
@@ -33,12 +41,6 @@ if grep -q "DB_USE_SSL=true" backend/.env; then
         echo "Please add the SSL certificate file as it's required when DB_USE_SSL=true"
         exit 1
     fi
-fi
-
-if [ ! -f frontend/.env ]; then
-    echo "Warning: frontend/.env file not found"
-    echo "Creating empty frontend/.env"
-    touch frontend/.env
 fi
 
 # Kill any existing SSH agents
