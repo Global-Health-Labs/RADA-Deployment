@@ -8,7 +8,8 @@ services:
       ssh:
         - default=/home/ec2-user/.ssh/id_ed25519
     expose:
-      - "8443"  # Only expose to internal network
+      - "8080"  # HTTP port
+      - "8443"  # HTTPS port
     environment:
       - NODE_ENV=production
       - DOMAIN_NAME=${DOMAIN_NAME}
@@ -20,10 +21,10 @@ services:
     networks:
       - rada-network
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-check-certificate -q --spider https://localhost:8443/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
       start_period: 30s
 
   frontend:
