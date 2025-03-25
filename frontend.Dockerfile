@@ -7,7 +7,7 @@ WORKDIR /app
 RUN apk add --no-cache git openssh
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@10.0.0
 
 # Download public key for bitbucket.org
 RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
