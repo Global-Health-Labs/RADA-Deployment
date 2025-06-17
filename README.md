@@ -3,14 +3,16 @@
 ## Environment Setup
 
 1. Copy the environment template to create your deployment-specific .env file:
+
    ```bash
    cp .env.template .env
    ```
 
 2. Edit the .env file with your deployment-specific values:
+
    ```bash
    # For staging
-   DOMAIN_NAME=rada-staging.ghlab.it
+   DOMAIN_NAME=rada.ghlab.it
 
    # For production
    DOMAIN_NAME=rada.ghlab.it
