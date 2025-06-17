@@ -9,11 +9,11 @@ RUN apk add --no-cache git openssh wget python3 py3-pip py3-virtualenv
 # Install pnpm
 RUN npm install -g pnpm@10.0.0
 
-# Download public key for bitbucket.org
-RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
+# Download public key for github.com
+RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 # Clone repository using SSH
-RUN --mount=type=ssh,id=default git clone --branch main git@bitbucket.org:catchshyam/rada-backend.git . && git pull origin main
+RUN --mount=type=ssh,id=default git clone --branch main git@github.com:Global-Health-Labs/RADA-Backend.git . && git pull origin main
 
 # Setup Python virtual environment and install dependencies
 RUN python3 -m venv /app/venv

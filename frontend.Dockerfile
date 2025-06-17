@@ -9,11 +9,11 @@ RUN apk add --no-cache git openssh
 # Install pnpm
 RUN npm install -g pnpm@10.0.0
 
-# Download public key for bitbucket.org
-RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
+# Download public key for github.com
+RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 # Clone repository using SSH
-RUN --mount=type=ssh,id=default git clone --branch main git@bitbucket.org:catchshyam/rada-frontend-ts.git . && git pull origin main
+RUN --mount=type=ssh,id=default git clone --branch main git@github.com:Global-Health-Labs/Robotic-Assay-Development-Application-RADA-.git . && git pull origin main
 
 # Copy package files
 COPY frontend/package*.json ./
